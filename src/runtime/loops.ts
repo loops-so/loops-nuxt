@@ -10,9 +10,8 @@ export default defineEventHandler((event) => {
     if (!config.loops.apiKey) {
       throw new Error('Invalid or missing Loops API key.')
     }
-    else {
-      loops = new LoopsClient(config.loops.apiKey)
-      event.context.loops = loops
-    }
+    loops = new LoopsClient(config.loops.apiKey)
   }
+
+  event.context.loops = loops
 })

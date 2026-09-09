@@ -1,4 +1,4 @@
-import { defineNuxtModule, addServerHandler, createResolver } from '@nuxt/kit'
+import { defineNuxtModule, addServerHandler, addTypeTemplate, createResolver } from '@nuxt/kit'
 import { defu } from 'defu'
 
 // Module options TypeScript interface definition
@@ -6,12 +6,6 @@ export interface ModuleOptions {
   apiKey: string
 }
 
-// Define the structure of the runtime config
-interface RuntimeConfig {
-  loops?: {
-    apiKey?: string
-  }
-}
 export default defineNuxtModule<ModuleOptions>({
   meta: {
     name: 'nuxt-loops',
@@ -31,12 +25,32 @@ export default defineNuxtModule<ModuleOptions>({
       middleware: true,
     })
 
+    addTypeTemplate({
+      filename: 'types/nuxt-loops.d.ts',
+      getContents: () => `import type { LoopsClient } from 'loops'
+
+declare module 'h3' {
+  interface H3EventContext {
+    loops: LoopsClient
+  }
+}
+
+export {}
+`,
+    })
+
     // Merge user config with default config
     _nuxt.options.runtimeConfig.loops = defu(
-      _nuxt.options.runtimeConfig.loops as RuntimeConfig,
+      _nuxt.options.runtimeConfig.loops,
       {
         apiKey,
       },
     )
   },
 })
+
+declare module '@nuxt/schema' {
+  interface RuntimeConfig {
+    loops: ModuleOptions
+  }
+}

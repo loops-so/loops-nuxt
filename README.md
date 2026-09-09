@@ -4,6 +4,8 @@
 
 This Nuxt module makes it easy to add the Loops [JavaScript SDK](https://loops.so/docs/sdks/javascript) to your Nuxt project.
 
+This module tracks [`loops` ^7.3.0](https://www.npmjs.com/package/loops/v/7.3.0). Method signatures in these docs match that SDK version.
+
 ## Installation
 
 You can install the package [from npm](https://www.npmjs.com/package/nuxt-loops):
@@ -11,6 +13,8 @@ You can install the package [from npm](https://www.npmjs.com/package/nuxt-loops)
 ```bash
 npm install nuxt-loops
 ```
+
+Minimum Node version required: 18.0.0.
 
 You will need a Loops API key to use the module.
 
@@ -31,19 +35,33 @@ export default defineNuxtConfig({
 
 ## Usage
 
+The Loops API and SDK should only be used on the server side to protect your API key.
+
 To use the module, import `loops` from the request context.
 
-Then call one of the SDK methods. Read through the [JS SDK docs](https://loops.so/docs/sdks/javascript#methods) for more details.
+Then call one of the SDK methods. Read through the [JS SDK docs](https://www.npmjs.com/package/loops/v/7.3.0) for more details.
 
 ```javascript
+import { APIError } from "loops";
+
 export default defineEventHandler(async (event) => {
   const { loops } = event.context;
 
-  const response = await loops.updateContact("hello@gmail.com", {
-    firstName: "Bri",
-    lastName: "Chambers",
-  })
+  try {
+    const response = await loops.updateContact({
+      email: "hello@gmail.com",
+      properties: {
+        firstName: "Bri",
+        lastName: "Chambers",
+      },
+    });
+  } catch (error) {
+    if (error instanceof APIError) {
+      console.log(error.json);
+      console.log(error.statusCode);
+    }
+  }
 });
 ```
 
-See the API documentation to learn more about [rate limiting](https://loops.so/docs/api-reference#rate-limiting) and [error handling](/api-reference#debugging).
+See the API documentation to learn more about [rate limiting](https://loops.so/docs/api-reference#rate-limiting) and [error handling](https://loops.so/docs/api-reference#debugging).
